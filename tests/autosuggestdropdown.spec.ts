@@ -4,13 +4,44 @@ import {test,expect,Locator} from '@playwright/test'
 
 test("Auto Suggest Dropdown" , async({page})=>{
     await page.goto("https://www.flipkart.com/");
-    await page.locator('xpath=//input[@name="q"]').fill("smart");
-    //Get all the suggested options --> ctrl+shift+P on DOM -->emulate focussed page
-    const options:Locator=page.locator("ul>li a");
-    await page.waitForTimeout(5000);
+    const closeICon:Locator= page.locator('//span[@role="button"]');
+    await closeICon.waitFor({state: 'visible', timeout: 10000});
+    await closeICon.click();
+
+    const searchInput = page.locator('input[name="q"]').first();
+    await searchInput.fill("smart");
+
+    const options:Locator = page.locator('ul>li');
+    await options.first().waitFor({state: 'visible', timeout: 10000});
 
     const count = await options.count();
     console.log("Number of Suggested Options:",count);
-    await page.waitForTimeout(5000);
+    console.log("Printing all the auto suggestions.....");
+
+    for(let i=0;i<count;i++){
+        const option = options.nth(i);
+        const optionText = (await option.textContent())?.trim();
+        console.log("Suggested Option:", optionText);
+    }
+
+    // for(let i=0;i<count;i++){
+    //     const option = options.nth(i);
+    //     const optionText = (await option.textContent())?.trim();
+    //     if(optionText && optionText.toLowerCase().includes("smart tv")){
+    //         await option.waitFor({state: 'visible', timeout: 10000});
+    //         await option.scrollIntoViewIfNeeded();
+    //         await option.click();
+    //         break;
+    //     }
+    // }
+    for(let i=0;i<count;i++){
+        const text = await options.nth(i).innerText();
+      if(text==="smartphone"){
+       await options.nth(i).click();
+       break;
+
+      }
+    }
+
 
 })
